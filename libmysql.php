@@ -9,7 +9,7 @@ $mysql_printerrors=true;			// print all errors or keep them secret
 $mysql_dieifstarterror=true;		// die() if error in mysql_on()
 $mysql_ratelimit["a"]=false;		// rate limiter activation, works only in mysql_do()
 $mysql_ratelimit["n"]=100;			// rate limiting after N queries if active
-$mysql_ratelimit["t"]=4;			// rate limiter sleep time (seconds)
+$mysql_ratelimit["t"]=4;			// rate limiter sleep(seconds) time
 
 function mysql_on() {	// open mysql connection
 	global $mysql_conn, $mysql_conn_active, $mysql_dataconn, $mysql_printerrors, $mysql_dieifstarterror;
@@ -41,7 +41,7 @@ function mysql_off() {	// close mysql connection
 	return true;
 };
 
-function mysql_do($sql, $return=false, $many=false) {	// execute mysql query, if returns results $return=true, if returns bidimensional array $return=true & $tanti=true
+function mysql_do($sql, $return=false, $many=false) {	// execute mysql query, if returns results $return=true, if returns bidimensional array $return=true and $many=true
 	global $mysql_conn, $mysql_conn_active, $mysql_autostart, $mysql_printerrors, $mysql_ratelimit;
 	// check if active mysql connection
 	if (!$mysql_conn_active) {
@@ -57,7 +57,7 @@ function mysql_do($sql, $return=false, $many=false) {	// execute mysql query, if
 			$mysql_ratelimit["c"]=0;
 		};
 		$mysql_ratelimit["c"]++;
-		if ($mysql_ratelimit["n"] > 100) {
+		if ($mysql_ratelimit["c"] > $mysql_ratelimit["n"]) {
 			$mysql_ratelimit["c"]=0;
 			sleep($mysql_ratelimit["t"]);
 		};
@@ -80,7 +80,6 @@ function mysql_do($sql, $return=false, $many=false) {	// execute mysql query, if
 		} else {		// only one row
 			$finale=$res->fetch_assoc();
 		};
-		$res->free();
 	} else {		// only query execution
 		$finale=true;
 	};
@@ -102,7 +101,7 @@ function mysql_es($in, $html=true) {	// you have to escape strings before using 
 	// other funcions
 	if ($html) {	// (default)
 		$temp=trim(htmlspecialchars($in));
-	} else {		// nothing
+	} else {		// nothing else
 		$temp=$in;
 	};
 	//return
