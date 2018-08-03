@@ -3,13 +3,14 @@ $mysql_dataconn["h"]="localhost";	// hostname
 $mysql_dataconn["u"]="root";		// username
 $mysql_dataconn["p"]="toor";		// password
 $mysql_dataconn["d"]="database";	// database
-$mysql_dataconn["n"]="3306";		// port
+$mysql_dataconn["n"]="3306";		// port (default: 3306)
 $mysql_autostart=true;				// autostart mysql_on() at the first mysql_do() or mysql_es()
 $mysql_printerrors=true;			// print all errors or keep them secret
 $mysql_dieifstarterror=true;		// die() if error in mysql_on()
 $mysql_ratelimit["a"]=false;		// rate limiter activation, works only in mysql_do()
 $mysql_ratelimit["n"]=100;			// rate limiting after N queries if active
 $mysql_ratelimit["t"]=4;			// rate limiter sleep(seconds) time
+$mysql_resfree=false;				// use free() at the end mysql_do()
 
 function mysql_on() {	// open mysql connection
 	global $mysql_conn, $mysql_conn_active, $mysql_dataconn, $mysql_printerrors, $mysql_dieifstarterror;
@@ -42,7 +43,7 @@ function mysql_off() {	// close mysql connection
 };
 
 function mysql_do($sql, $return=false, $many=false) {	// execute mysql query, if returns results $return=true, if returns bidimensional array $return=true and $many=true
-	global $mysql_conn, $mysql_conn_active, $mysql_autostart, $mysql_printerrors, $mysql_ratelimit;
+	global $mysql_conn, $mysql_conn_active, $mysql_autostart, $mysql_printerrors, $mysql_ratelimit, $mysql_resfree;
 	// check if active mysql connection
 	if (!$mysql_conn_active) {
 		if ($mysql_autostart) {
@@ -84,7 +85,9 @@ function mysql_do($sql, $return=false, $many=false) {	// execute mysql query, if
 		$finale=true;
 	};
 	// close and return
-	$res->free();
+	if ($mysql_resfree) {
+		$res->free();
+	};
 	return $finale;
 };
 
